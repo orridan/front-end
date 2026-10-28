@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#021A54" />
+    <meta name="color-scheme" content="dark light" />
+    <!-- seo:start -->
+    <!-- seo:end -->
+    <!-- jsonld -->
+    <link rel="icon" href="/favicon.ico?v=3" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+    <link rel="manifest" href="/site.webmanifest?v=3" />
+    <link rel="preload" href="/fonts/big-shoulders-display-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <script>
+      // Progressive enhancement flags, set before first paint. Content stays visible without them.
+      (function () {
+        var d = document.documentElement;
+        d.className += ' js';
+        try {
+          if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+          if (!sessionStorage.getItem('orridan.intro')) {
+            d.className += ' intro-play';
+            sessionStorage.setItem('orridan.intro', '1');
+          }
+        } catch (e) {
+          /* storage blocked: skip the intro */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <p style="padding:24px;font-family:system-ui,sans-serif;color:#F5F5F5;background:#021A54">
+        Orridan works best with JavaScript turned on. You can still read our
+        <a href="/privacy" style="color:#FFCEE3">Privacy Policy</a> and <a href="/terms" style="color:#FFCEE3">Terms</a>.
+      </p>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

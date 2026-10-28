@@ -1,0 +1,10 @@
+node_modules
+dist
+dist-e2e
+.env
+.env.local
+public/api/config.php
+test-results
+playwright-report
+lighthouse
+*.log

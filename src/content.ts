@@ -16,7 +16,7 @@ import { readEnv } from './env';
  * Set to true when the real product page content replaces <ProductContentSlot />.
  * While false, /product is served with noindex,follow and left out of the sitemap.
  */
-export const productPageReady = false;
+export const productPageReady = true;
 
 /* ================================================================== */
 /* Site and routes                                                     */
@@ -164,7 +164,7 @@ export const seo: Record<'home' | 'product' | 'privacy' | 'terms' | 'cookies' | 
     path: routes.product,
     title: 'O.VX by Orridan: Product Overview',
     description:
-      'An overview of O.VX by Orridan for industrial asset records, digital twin configurations and simulation result comparison.',
+      'Explore how O.VX organizes industrial assets, twin configurations, simulation scenarios, historical state records and documented results.',
     noindex: !productPageReady,
     inSitemap: productPageReady,
   },
@@ -677,11 +677,159 @@ export const footer = {
 /* ================================================================== */
 
 export const productPage = {
-  eyebrow: 'Product',
-  heading: 'O.VX',
-  line: 'Detailed product information is coming soon.',
-  dashboardCta: 'Open Dashboard',
-  homeCta: 'Back to Home',
+  eyebrow: 'Industrial Digital Twin Intelligence',
+  heading: 'Connect Industrial Assets to Every Engineering Record.',
+  line: 'Explore how Orridan organizes industrial assets, digital twin configurations, simulation scenarios, historical state records, and documented results in one structured engineering workspace.',
+  dashboardCta: 'Explore Platform',
+  technologyCta: 'Technology Foundation',
+  visualLabel: 'Illustrative record path',
+  visualDescription: 'Illustrative, non-live diagram linking an industrial asset record to a twin configuration, scenario record, state history, and recorded result comparison.',
+  visualRecords: [
+    { label: 'Asset registry', detail: 'Identity / location / status' },
+    { label: 'Twin configuration', detail: 'Model reference / parameters' },
+    { label: 'Scenario record', detail: 'Inputs / expected outcomes' },
+  ],
+  visualHistory: 'Recorded state history',
+  visualComparison: 'Result comparison',
+  visualNote: 'Illustrative workflow, not live data',
+  foundation: {
+    eyebrow: 'Current application foundation',
+    heading: 'A structured record system for engineering work.',
+    intro: 'O.VX is described as a responsive web application for organizing industrial asset and digital twin records, with historical context for review. It does not connect to live equipment or execute physical simulations.',
+    items: [
+      { label: 'Application', value: 'PHP / Laravel' },
+      { label: 'Data layer', value: 'SQL database' },
+      { label: 'Interfaces', value: 'Responsive web application and backend APIs' },
+      { label: 'Access model', value: 'Authentication and role-based permissions' },
+      { label: 'Records', value: 'Assets, twin configurations, scenarios, telemetry samples, state history, results and maintenance' },
+      { label: 'Traceability', value: 'Configuration history, validation, activity tracking and structured engineering records' },
+    ],
+    note: 'Telemetry values are historical records entered or imported into the application; they are not streamed live.',
+  },
+  technology: {
+    eyebrow: 'Technology foundation',
+    heading: 'A clear boundary between current records and future integrations.',
+    intro: 'The current application foundation is separate from the NVIDIA technologies shown here as possible future integrations.',
+    proposedLabel: 'Proposed integration',
+    currentLabel: 'Current application foundation',
+    futureMeta: 'Future',
+    applicationTitle: 'O.VX application stack',
+    currentIndex: 'Current',
+    boundaryLabel: 'Separate from current application flow',
+    proposedOnlyLabel: 'Proposed only',
+    items: [
+      {
+        name: 'NVIDIA Omniverse',
+        description: 'Technologies for developing industrial digital-twin and 3D workflows. A future Orridan integration could connect suitable scene representations with engineering records; no Omniverse connection is implemented today.',
+      },
+      {
+        name: 'OpenUSD',
+        description: 'An extensible framework for describing, composing, and exchanging 3D scene data across compatible tools. It could support future asset representation and interoperability; Orridan does not currently import, export, validate, or render USD assets.',
+      },
+      {
+        name: 'NVIDIA Isaac Sim',
+        description: 'A robotics development and simulation environment for physically based testing in virtual worlds. It may suit selected future robotics workflows; Orridan does not launch Isaac Sim, execute simulations, or control robots.',
+      },
+      {
+        name: 'NVIDIA PhysicsNeMo',
+        description: 'A framework for physics-informed and scientific machine-learning workflows. Future use would depend on suitable datasets, validated models, and compute infrastructure; it does not power current predictions or simulation execution in Orridan.',
+      },
+    ],
+    foundationItems: [
+      { label: 'Application', value: 'PHP / Laravel' },
+      { label: 'Data', value: 'SQL database' },
+      { label: 'Interfaces', value: 'Responsive web app / backend APIs' },
+      { label: 'Records', value: 'Assets / configurations / scenarios / history / results' },
+    ],
+  },
+  architecture: {
+    eyebrow: 'Technical architecture',
+    heading: 'Records move through a defined application layer.',
+    intro: 'The current application path organizes user-entered or imported records and makes their history available for review and summary.',
+    stages: [
+      { title: 'Engineering users', detail: 'Administrators, engineering managers, engineers and viewers.', icon: 'building' },
+      { title: 'Responsive web application', detail: 'Browser-based interface for working with structured records.', icon: 'dashboard' },
+      { title: 'Laravel application layer', detail: 'Application logic and backend APIs.', icon: 'gear' },
+      { title: 'Authentication and permissions', detail: 'Access is governed by configured user roles.', icon: 'lock' },
+      { title: 'Structured SQL records', detail: 'Validated application records stored in a relational data layer.', icon: 'registry' },
+      { title: 'Engineering record groups', detail: 'Assets, configurations, scenarios, telemetry, results and maintenance.', icon: 'twin' },
+      { title: 'History and summaries', detail: 'Activity, asset-state history and dashboard summaries from stored records.', icon: 'activity' },
+    ],
+    futureHeading: 'Proposed future integrations',
+    futureIntro: 'These are separate assessment areas, not active connections or current data-flow stages.',
+    futureItems: [
+      { title: 'Omniverse + OpenUSD', detail: 'Assess suitable 3D scene and data-exchange workflows.' },
+      { title: 'Isaac Sim', detail: 'Assess supported robotics simulation use cases.' },
+      { title: 'PhysicsNeMo', detail: 'Assess physics-informed machine-learning feasibility.' },
+    ],
+  },
+  capabilities: {
+    eyebrow: 'Application capabilities',
+    heading: 'The records that keep engineering work connected.',
+    intro: 'Organize assets, configuration changes, scenario definitions, historical measurements, documented outcomes and maintenance activity without implying live operational control.',
+    items: [
+      {
+        title: 'Asset registry', icon: 'asset',
+        text: 'Keep each industrial asset identifiable and connected to its operating context.',
+        points: ['Identity, type, location, owner and status', 'Facility and production-line associations', 'Asset record and state history'],
+      },
+      {
+        title: 'Twin configuration management', icon: 'twin',
+        text: 'Maintain the metadata that describes how a digital twin is configured.',
+        points: ['Twin metadata and model references', 'Component and parameter records', 'Draft, active and archived versions'],
+      },
+      {
+        title: 'Simulation scenario management', icon: 'scenario',
+        text: 'Document scenario definitions and keep their revisions connected to the relevant asset.',
+        points: ['Objectives, parameters and expected outcomes', 'Asset and twin associations', 'Scenario versions and recorded status'],
+      },
+      {
+        title: 'Telemetry and state history', icon: 'telemetry',
+        text: 'Review historical readings and recorded operating-state changes.',
+        points: ['Timestamped readings and states', 'Historical measurements and changes', 'Manually entered or imported records; no live stream'],
+      },
+      {
+        title: 'Simulation result comparison', icon: 'compare',
+        text: 'Compare documented outcomes without suggesting Orridan runs the underlying simulation.',
+        points: ['Recorded outcomes and metrics', 'Comparisons across scenario versions', 'Deviations and engineering review comments'],
+      },
+      {
+        title: 'Maintenance and performance summaries', icon: 'maintenance',
+        text: 'Keep maintenance work and record-based summaries in the asset context.',
+        points: ['Asset and configuration summaries', 'Recorded-state and result summaries', 'Maintenance tasks and recent activity'],
+      },
+    ],
+  },
+  governance: {
+    eyebrow: 'Governance and engineering review',
+    heading: 'Keep decisions attached to the records they change.',
+    intro: 'History, activity and recorded outcomes support engineering review, accountability and handover. Role access depends on application configuration; validation is presented as an application requirement because its backend implementation is not verifiable in this public-site repository.',
+    items: [
+      { title: 'Twin configuration history', status: 'Described capability', detail: 'Version records make configuration changes easier to review and trace.' },
+      { title: 'Traceable simulation records', status: 'Described capability', detail: 'Keep scenario definitions, recorded outcomes and review notes in context.' },
+      { title: 'Role-based permissions', status: 'Configuration-dependent', detail: 'The specified roles are Administrators, Engineering Managers, Engineers and Viewers; effective permissions depend on application configuration.' },
+      { title: 'Asset-state history', status: 'Described capability', detail: 'Recorded state changes help teams reconstruct an asset’s historical context.' },
+      { title: 'Data validation', status: 'Application requirement', detail: 'Validation is required for reliable records; implementation details are not verifiable from this repository.' },
+      { title: 'Activity tracking', status: 'Described capability', detail: 'A record of who changed what supports review and team handover.' },
+    ],
+  },
+  roadmap: {
+    eyebrow: 'Proposed Q3-Q4 roadmap',
+    heading: 'Planned Milestones & Development Stages.',
+    intro: 'A forward-looking sequence for strengthening record workflows and assessing where future integrations may be useful. These are proposed milestones, not delivery commitments.',
+    items: [
+      { title: 'Asset and twin record foundation', detail: 'Organize asset records, twin metadata and configuration versions.' },
+      { title: 'Scenario definition and versioning', detail: 'Improve scenario parameters, expected outcomes and version traceability.' },
+      { title: 'Historical state and telemetry records', detail: 'Strengthen timestamped measurement records, state history and review workflows.' },
+      { title: 'Result comparison and engineering review', detail: 'Improve comparison of recorded outcomes with expected results, deviations and review comments.' },
+      { title: 'Dashboard and maintenance visibility', detail: 'Consolidate asset summaries, maintenance tasks, recent changes and documented outcomes.' },
+      { title: 'OpenUSD interoperability assessment', detail: 'Evaluate requirements and feasibility for future scene-data exchange.' },
+      { title: 'Omniverse and robotics workflow assessment', detail: 'Assess suitable digital-twin integration approaches and relevant Isaac Sim robotics workflows.' },
+      { title: 'PhysicsNeMo feasibility assessment', detail: 'Evaluate potential use cases, datasets, model validation and infrastructure needs.' },
+    ],
+    note: 'All stages are planned for assessment or development. No dates, integration outcomes or delivery guarantees are implied.',
+    statusLabel: 'Planned',
+  },
 };
 
 /* ================================================================== */

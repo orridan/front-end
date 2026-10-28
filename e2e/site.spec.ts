@@ -85,7 +85,7 @@ test.describe('dashboard link placement', () => {
 });
 
 test.describe('product page', () => {
-  test('hero button lands on /product with two working buttons', async ({ page }) => {
+  test('hero CTAs open the platform and scroll to the technology foundation', async ({ page }) => {
     await seedConsent(page);
     await page.goto('/');
     await page.getByTestId('hero-cta').click();
@@ -95,14 +95,14 @@ test.describe('product page', () => {
     await expect(dashboard).toHaveAttribute('href', site.dashboardUrl);
     await expect(dashboard).toHaveAttribute('target', '_blank');
     await expect(dashboard).toHaveAttribute('rel', 'noopener noreferrer');
-    await page.getByTestId('product-home').click();
-    await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByTestId('hero-cta')).toBeVisible();
+    await page.getByTestId('product-tech-cta').click();
+    await expect(page).toHaveURL(/\/product#technology-foundation$/);
+    await expect(page.getByRole('heading', { name: /A clear boundary between current records and future integrations/i })).toBeInViewport();
   });
 
-  test('product route head is noindex and canonical', async ({ page }) => {
+  test('product route is indexable and canonical', async ({ page }) => {
     await page.goto('/product');
-    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex,follow');
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'index,follow');
     await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://orridan.net/product');
   });

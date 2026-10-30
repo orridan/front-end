@@ -1,14 +1,15 @@
 import { useRef, type ReactNode } from 'react';
 import { Link } from 'react-router';
-import { citationLinks, drawing, footer, socialLinks, type ExternalLink as ExtLink, type FooterLink } from '../content';
+import { drawing, footer, type FooterLink } from '../content';
 import { consentStore } from '../lib/consent';
-import { isRealUrl, fill } from '../lib/placeholder';
+import { fill } from '../lib/placeholder';
 import { useFillOnScroll } from '../lib/fillOnScroll';
 import { ExternalLink, SectionLink } from './Links';
 import { Logo } from './Logo';
 import { Icon } from './Icon';
 import { Newsletter } from './Newsletter';
 import { CompanyContact } from './LegalLayout';
+import { SocialLinks } from './SocialLinks';
 
 const rowCls = 'group flex items-center gap-3 w-full min-h-[44px] py-2 text-light/90 hover:text-light';
 
@@ -70,32 +71,10 @@ function Cell({ label, children, className = '' }: { label: string; children: Re
   );
 }
 
-function LinkGroup({ heading, links }: { heading: string; links: ExtLink[] }) {
-  const real = links.filter((l) => isRealUrl(l.href));
-  if (real.length === 0) return null;
-  return (
-    <div>
-      <p className="mono text-[0.625rem] uppercase tracking-[0.16em] text-blush/80 mb-2">{heading}</p>
-      <ul className="flex flex-wrap gap-2" role="list">
-        {real.map((l) => (
-          <li key={l.label}>
-            <ExternalLink href={l.href} className="inline-flex items-center gap-2 min-h-[44px] px-3 border border-blush/40 rounded-sm text-light/90 hover:text-light">
-              <Icon name={l.icon === 'x' ? 'xLogo' : (l.icon ?? 'link')} size={16} />
-              {l.label}
-              <span className="sr-only">{footer.newTab}</span>
-            </ExternalLink>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 export function Footer() {
   const year = new Date().getFullYear();
   const wordRef = useRef<HTMLDivElement>(null);
   useFillOnScroll(wordRef);
-  const hasLinks = socialLinks.some((l) => isRealUrl(l.href)) || citationLinks.some((l) => isRealUrl(l.href));
   const half = Math.ceil(footer.index.length / 2);
 
   function backToTop() {
@@ -161,12 +140,7 @@ export function Footer() {
             </div>
           </div>
 
-          {hasLinks ? (
-            <div className="border-b border-r border-blush/30 p-5 sm:p-6 grid gap-6 sm:grid-cols-2">
-              <LinkGroup heading={footer.socialHeading} links={socialLinks} />
-              <LinkGroup heading={footer.citationHeading} links={citationLinks} />
-            </div>
-          ) : null}
+          <SocialLinks className="border-b border-r border-blush/30 p-5 sm:p-6" />
 
           <div className="border-b border-r border-blush/30 px-5 py-3 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3">
             <p className="text-small text-muted">{fill(footer.copyright, { year })}</p>

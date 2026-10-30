@@ -1,4 +1,4 @@
-import { chatbot, closingBanner, company, contact, faq, nav, pricing, productPage, sectionIds, site } from '../src/content';
+import { citationLinks, closingBanner, company, contact, faq, nav, newsletter, pricing, privacyPage, productPage, sectionIds, site, socialLinks, termsPage } from '../src/content';
 import { expect, isDesktop, ROUTES, scrollThrough, scrollToSection, seedConsent, stubThirdParties, test } from './fixtures';
 
 test.beforeEach(async ({ page }) => {
@@ -69,18 +69,12 @@ test.describe('dashboard link placement', () => {
     await expect(page.getByTestId('product-dashboard')).toHaveAttribute('href', site.dashboardUrl);
   });
 
-  test('closing banner opens the contact form and the chatbot leads to the product page', async ({ page }) => {
+  test('closing banner opens the contact form', async ({ page }) => {
     await seedConsent(page);
     await page.goto('/');
     await page.getByTestId('closing-cta').click();
     await expect(page.locator('#contact')).toBeInViewport();
     await expect(page.getByTestId('contact-subject')).toHaveValue(closingBanner.subject);
-    await page.goto('/');
-    await page.getByTestId('chat-fab').click();
-    const panel = page.getByRole('dialog', { name: chatbot.title });
-    await panel.getByRole('button', { name: 'How do I sign in?' }).click();
-    await panel.getByRole('button', { name: chatbot.productAction }).click();
-    await expect(page).toHaveURL(/\/product$/);
   });
 });
 
@@ -213,7 +207,8 @@ test.describe('cookie consent', () => {
     const external: string[] = [];
     page.on('request', (r) => {
       const url = new URL(r.url());
-      if (url.hostname !== 'localhost') external.push(r.url());
+      // Chatwoot live chat loads for every visitor by client decision.
+      if (url.hostname !== 'localhost' && url.hostname !== new URL(site.chatwoot.baseUrl).hostname) external.push(r.url());
     });
     await page.goto('/');
     const banner = page.getByTestId('consent-banner');
@@ -285,6 +280,7 @@ test.describe('pricing', () => {
     await expect(section.locator('[data-table-price="twin"]')).toHaveText('$150 / month');
     await expect(section.getByTestId('plan-cta-organisation')).toHaveAttribute('href', /test_e2e_org_monthly/);
 
+    await expect(section.getByTestId('plan-cta-enterprise')).toHaveAttribute('href', '/#contact');
     await section.getByTestId('plan-cta-enterprise').click();
     await expect(page.locator('#contact')).toBeInViewport();
     await expect(page.getByTestId('contact-subject')).toHaveValue(pricing.enterpriseSubject);
@@ -303,7 +299,7 @@ test.describe('contact form', () => {
   test('validates, then shows success only after the server confirms', async ({ page }) => {
     await seedConsent(page);
     let payload: Record<string, unknown> | null = null;
-    await page.route('**/api/contact.php', async (route) => {
+    await page.route(contact.endpoint, async (route) => {
       payload = route.request().postDataJSON();
       // Long enough to observe the disabled sending state on slow engines.
       await new Promise((r) => setTimeout(r, 2000));
@@ -332,13 +328,17 @@ test.describe('contact form', () => {
     await form.getByTestId('contact-submit').click();
     await expect(form.getByTestId('contact-submit')).toBeDisabled();
     await expect(page.getByTestId('contact-success')).toBeVisible();
-    expect(payload).toMatchObject({ type: 'contact', name: 'Ada Lovelace', email: 'ada@example.com', subject: 'Pricing', recaptchaToken: 'test-token', hp_field: '' });
+    expect(payload).toMatchObject({ name: 'Ada Lovelace', email: 'ada@example.com', subject: 'Pricing', 'g-recaptcha-response': 'test-token', _gotcha: '' });
+    // The empty form returns on its own, ready for the next message.
+    await expect(page.getByTestId('contact-success')).toBeHidden({ timeout: contact.successResetMs + 5000 });
+    await expect(form.getByLabel('Name')).toHaveValue('');
+    await expect(form.getByTestId('contact-submit')).toBeEnabled();
   });
 
   test('shows an error and no success when the server fails', async ({ page }) => {
     await seedConsent(page);
-    await page.route('**/api/contact.php', (route) =>
-      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ ok: false, error: 'server_error' }) }),
+    await page.route(contact.endpoint, (route) =>
+      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'Something went wrong' }) }),
     );
     await page.goto('/#contact');
     const form = page.getByTestId('contact-form');
@@ -355,7 +355,7 @@ test.describe('contact form', () => {
 
   test('a 200 without ok:true is not treated as success', async ({ page }) => {
     await seedConsent(page);
-    await page.route('**/api/contact.php', (route) => route.fulfill({ status: 200, contentType: 'text/html', body: '<html>proxy page</html>' }));
+    await page.route(contact.endpoint, (route) => route.fulfill({ status: 200, contentType: 'text/html', body: '<html>proxy page</html>' }));
     await page.goto('/#contact');
     const form = page.getByTestId('contact-form');
     await form.getByLabel('Name').fill('Ada Lovelace');
@@ -370,7 +370,11 @@ test.describe('contact form', () => {
 
   test('newsletter validates and confirms', async ({ page }) => {
     await seedConsent(page);
-    await page.route('**/api/contact.php', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+    let payload: Record<string, unknown> | null = null;
+    await page.route(newsletter.endpoint, (route) => {
+      payload = route.request().postDataJSON();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
+    });
     await page.goto('/privacy');
     const footer = page.getByRole('contentinfo');
     await footer.getByRole('button', { name: 'Subscribe' }).click();
@@ -378,49 +382,33 @@ test.describe('contact form', () => {
     await footer.getByLabel('Email address').fill('ada@example.com');
     await footer.getByRole('button', { name: 'Subscribe' }).click();
     await expect(footer.getByText('Thanks. You are subscribed.')).toBeVisible();
+    expect(payload).toMatchObject({ email: 'ada@example.com', _gotcha: '' });
+    await expect(footer.getByLabel('Email address')).toHaveValue('');
+    await expect(footer.getByText('Thanks. You are subscribed.')).toBeHidden({ timeout: newsletter.successResetMs + 5000 });
   });
 });
 
-test.describe('chatbot', () => {
-  test('opens, answers from the FAQ and falls back to contact', async ({ page }) => {
+test.describe('live chat', () => {
+  test('FAQ button opens the contact form while Chatwoot is unavailable', async ({ page }) => {
+    await page.route('https://app.chatwoot.com/**', (route) => route.abort());
     await seedConsent(page);
     await page.goto('/');
-    await page.getByTestId('chat-fab').click();
-    const panel = page.getByRole('dialog', { name: chatbot.title });
-    await expect(panel).toBeVisible();
-    await expect(panel.getByText(chatbot.disclaimer)).toBeVisible();
-    await expect(panel.getByRole('textbox', { name: chatbot.inputLabel })).toBeFocused();
-
-    await panel.getByRole('button', { name: 'Does it use live data?' }).click();
-    const liveAnswer = chatbot.facts.find((i) => i.id === 'live-data')!.answer;
-    await expect(panel.getByRole('log')).toContainText(liveAnswer);
-
-    await panel.getByRole('textbox').fill('how much does it cost');
-    await page.keyboard.press('Enter');
-    await expect(panel.getByRole('log')).toContainText('$50 / month');
-
-    await panel.getByRole('textbox').fill('banana smoothie');
-    await page.keyboard.press('Enter');
-    await expect(panel.getByRole('log')).toContainText(chatbot.fallback);
-    await panel.getByRole('button', { name: chatbot.fallbackAction }).last().click();
-    await expect(panel).toBeHidden();
+    await scrollToSection(page, sectionIds.faq);
+    await page.getByRole('button', { name: faq.askCta }).click();
     await expect(page.locator('#contact')).toBeInViewport();
-    await expect(page.getByTestId('contact-subject')).toHaveValue(chatbot.fallbackSubject);
+    await expect(page.getByTestId('contact-subject')).toHaveValue(faq.askSubject);
   });
 
-  test('Escape closes and the conversation persists in the session', async ({ page }) => {
-    await seedConsent(page);
+  test('Chatwoot loads for every visitor, before any cookie choice, and the FAQ button opens it', async ({ page }) => {
     await page.goto('/');
-    await page.getByTestId('chat-fab').click();
-    const panel = page.getByRole('dialog', { name: chatbot.title });
-    await panel.getByRole('button', { name: 'What is Orridan?' }).click();
-    await expect(panel.getByRole('log')).toContainText('records and management application');
-    await page.keyboard.press('Escape');
-    await expect(panel).toBeHidden();
-    await expect(page.getByTestId('chat-fab')).toBeFocused();
-    await page.reload();
-    await page.getByTestId('chat-fab').click();
-    await expect(page.getByRole('dialog', { name: chatbot.title }).getByRole('log')).toContainText('records and management application');
+    await expect(page.getByTestId('consent-banner')).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => (window as { __chatwoot?: { config: unknown } }).__chatwoot?.config))
+      .toEqual({ websiteToken: site.chatwoot.websiteToken, baseUrl: site.chatwoot.baseUrl });
+    await page.getByTestId('consent-banner').getByRole('button', { name: 'Reject non-essential' }).click();
+    await scrollToSection(page, sectionIds.faq);
+    await page.getByRole('button', { name: faq.askCta }).click();
+    expect(await page.evaluate(() => (window as { __chatwoot?: { calls: string[] } }).__chatwoot?.calls)).toContain('toggle:open');
   });
 });
 
@@ -446,22 +434,40 @@ test.describe('page order and FAQ', () => {
   });
 });
 
+test.describe('social links', () => {
+  test('footer and contact section show the filled profiles and listings with brand icons', async ({ page }) => {
+    await seedConsent(page);
+    await page.goto('/#contact');
+    const filled = [...socialLinks, ...citationLinks].filter((l) => l.href);
+    const empty = [...socialLinks, ...citationLinks].filter((l) => !l.href);
+    for (const area of [page.locator('#contact'), page.getByRole('contentinfo')]) {
+      for (const l of filled) {
+        const link = area.getByRole('link', { name: new RegExp(`^${l.label}\\s*\\(`) });
+        await expect(link).toHaveAttribute('href', l.href);
+        await expect(link).toHaveAttribute('target', '_blank');
+        await expect(link.locator('svg')).toHaveCount(1);
+      }
+      for (const l of empty) await expect(area.getByRole('link', { name: new RegExp(`^${l.label}\\s*\\(`) })).toHaveCount(0);
+    }
+  });
+});
+
 test.describe('legal pages', () => {
-  for (const route of ['/privacy', '/terms']) {
-    test(`${route} shows company contact details and a draft banner`, async ({ page }) => {
+  for (const [route, pageContent] of [['/privacy', privacyPage], ['/terms', termsPage]] as const) {
+    test(`${route} shows the client legal text with its contact section`, async ({ page }) => {
       await seedConsent(page);
       await page.goto(route);
-      await expect(page.getByText('Draft text, to be reviewed')).toBeVisible();
-      await expect(page.getByText('Last updated')).toBeVisible();
+      await expect(page.getByRole('heading', { level: 1, name: pageContent.heading })).toBeVisible();
+      await expect(page.getByText('Draft text, to be reviewed')).toHaveCount(0);
+      await expect(page.locator('time[datetime="2026-10-29"]')).toHaveText('29 October 2026');
+      for (const section of pageContent.sections) await expect(page.getByRole('heading', { level: 2, name: section.heading, exact: true })).toBeVisible();
       const contactSection = page.locator('#contact-us');
-      for (const label of [contact.infoLabels.email, contact.infoLabels.website, contact.infoLabels.founder, contact.infoLabels.founded]) await expect(contactSection.getByText(label, { exact: true })).toBeVisible();
-      await expect(contactSection.getByRole('link', { name: 'orridan.net', exact: true })).toHaveAttribute('href', 'https://orridan.net');
       await expect(contactSection.getByRole('link', { name: company.email })).toHaveAttribute('href', `mailto:${company.email}`);
-      for (const office of company.offices) {
-        await expect(contactSection.getByText(`${contact.infoLabels.phone}, ${office.region}`, { exact: true })).toBeVisible();
-        await expect(contactSection.getByText(`${office.legalName}, ${office.address}`)).toBeVisible();
-      }
-      await expect(contactSection.locator('a[href^="tel:"]')).toHaveCount(company.offices.length);
+      await expect(contactSection.getByRole('link', { name: '+1 212-842-8006' })).toHaveAttribute('href', 'tel:+12128428006');
+      await expect(contactSection.getByRole('link', { name: 'https://orridan.net/#contact' })).toHaveAttribute('href', '/#contact');
+      await expect(contactSection.getByRole('link', { name: '0112 854 166' })).toHaveAttribute('href', 'tel:+94112854166');
+      await expect(contactSection.getByText('Orridan PVT LTD, High Level Rd, Nugegoda 10250, Sri Lanka')).toBeVisible();
+      await expect(page.getByText('created with the help of')).toHaveCount(0);
     });
   }
 });

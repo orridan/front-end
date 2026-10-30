@@ -2,7 +2,7 @@
  * Pure head-tag builder shared by the <Seo> component (runtime), the Vite index.html
  * transform and the post-build per-route HTML writer. One source, identical output.
  */
-import { company, site, socialLinks, type SeoEntry } from '../content';
+import { citationLinks, company, site, socialLinks, type SeoEntry } from '../content';
 import { isRealEmail, isRealPhone, isRealUrl, isPlaceholder } from './placeholder';
 
 export type HeadTag = { tag: 'meta' | 'link'; attrs: Record<string, string> };
@@ -66,7 +66,7 @@ export function structuredData(): Record<string, unknown>[] {
     org.address = offices.map((o) => o.address);
     org.contactPoint = offices.map((o) => ({ '@type': 'ContactPoint', telephone: o.tel ?? o.phone, contactType: 'customer support', areaServed: o.region }));
   }
-  const sameAs = socialLinks.map((s) => s.href).filter((href) => isRealUrl(href));
+  const sameAs = [...socialLinks, ...citationLinks].map((s) => s.href).filter((href) => isRealUrl(href));
   if (sameAs.length) org.sameAs = sameAs;
   const website = {
     '@context': 'https://schema.org',

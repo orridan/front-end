@@ -16,6 +16,13 @@ export function Newsletter() {
 
   useEffect(() => () => controller.current?.abort(), []);
 
+  // Clear the success line after a moment so the form is ready for the next sign-up.
+  useEffect(() => {
+    if (status !== 'success') return;
+    const timer = window.setTimeout(() => setStatus('idle'), newsletter.successResetMs);
+    return () => window.clearTimeout(timer);
+  }, [status]);
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     if (status === 'sending') return;
@@ -27,7 +34,11 @@ export function Newsletter() {
     setStatus('sending');
     controller.current?.abort();
     controller.current = new AbortController();
-    const result = await postForm({ type: 'newsletter', email: email.trim(), hp_field: hp }, controller.current.signal);
+    const result = await postForm(
+      newsletter.endpoint,
+      { email: email.trim(), _subject: newsletter.emailSubject, _gotcha: hp },
+      controller.current.signal,
+    );
     if (result.ok) {
       setStatus('success');
       setEmail('');

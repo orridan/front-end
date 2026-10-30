@@ -6,7 +6,7 @@ import { Nav } from './components/Nav';
 import { Footer } from './components/Footer';
 import { ScrollManager } from './components/ScrollManager';
 import { CookieConsent, ConsentEffects } from './components/CookieConsent';
-import { Chatbot } from './components/Chatbot';
+import { loadLiveChat } from './lib/optionalScripts';
 import { Loading } from './components/Loading';
 import { usePrefersReducedMotion } from './lib/hooks';
 import Home from './pages/Home';
@@ -52,7 +52,10 @@ export default function App() {
     // Most links lead back to landing page sections: fetch that chunk while the browser is idle.
     const idle = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 1500));
     const cancel = window.cancelIdleCallback ?? window.clearTimeout;
-    const handle = idle(() => void BelowFold.preload());
+    const handle = idle(() => {
+      void BelowFold.preload();
+      loadLiveChat();
+    });
     return () => cancel(handle);
   }, []);
   // The route fade applies to navigations only, never to the first paint (keeps LCP fast).
@@ -91,7 +94,6 @@ export default function App() {
         </m.main>
         <Footer />
         <CookieConsent />
-        <Chatbot />
       </MotionConfig>
     </LazyMotion>
   );

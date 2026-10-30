@@ -1,5 +1,5 @@
 /**
- * Lets any button (pricing, chatbot, FAQ) jump to the contact form with a subject prefilled.
+ * Lets any button (pricing, FAQ, banners) jump to the contact form with a subject prefilled.
  * The form may mount later (lazy chunk), so the last request is kept until it is consumed.
  */
 import { sectionIds } from '../content';

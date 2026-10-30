@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { company, contact, legalCommon, type LegalSection, type SeoEntry } from '../content';
-import { fill, isRealEmail, isRealPhone, isRealUrl, telHref } from '../lib/placeholder';
+import { company, contact, legalCommon, type LegalBlock, type LegalListItem, type LegalSection, type SeoEntry } from '../content';
+import { isRealEmail, isRealPhone, isRealUrl, telHref } from '../lib/placeholder';
 import { Seo } from './Seo';
 import { PageHeader } from './PageHeader';
 import { Logo } from './Logo';
@@ -14,11 +14,38 @@ function formatDate(iso: string): string {
   return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(d);
 }
 
-const tokens = {
-  retention: company.dataRetention,
-  company: company.legalName,
-  governingLaw: company.governingLaw,
-};
+/** Renders the legal text inline markup: **bold** and [text](href). */
+function RichText({ text }: { text: string }) {
+  const parts: ReactNode[] = [];
+  let last = 0;
+  for (const m of text.matchAll(/\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)]+)\)/g)) {
+    parts.push(text.slice(last, m.index));
+    const key = m.index;
+    if (m[1]) parts.push(<strong key={key}>{m[1]}</strong>);
+    else if (/^https?:/.test(m[3])) parts.push(<ExternalLink key={key} href={m[3]} className="link">{m[2]}</ExternalLink>);
+    else parts.push(<a key={key} href={m[3]} className="link">{m[2]}</a>);
+    last = key + m[0].length;
+  }
+  parts.push(text.slice(last));
+  return <>{parts}</>;
+}
+
+function ListItem({ item }: { item: LegalListItem }) {
+  if (typeof item === 'string') return <li className="text-light/90"><RichText text={item} /></li>;
+  return (
+    <li className="text-light/90">
+      {item.paragraphs.map((p) => <p key={p}><RichText text={p} /></p>)}
+      {item.sub ? <ul>{item.sub.map((s) => <ListItem key={s} item={s} />)}</ul> : null}
+    </li>
+  );
+}
+
+function Block({ block }: { block: LegalBlock }) {
+  if ('h3' in block) return <h3>{block.h3}</h3>;
+  if ('h4' in block) return <h4>{block.h4}</h4>;
+  if ('p' in block) return <p className="text-light/90"><RichText text={block.p} /></p>;
+  return <ul>{block.ul.map((item, i) => <ListItem key={i} item={item} />)}</ul>;
+}
 
 /** Company contact block (offices, email, website, founder) from the single company object. */
 export function CompanyContact() {
@@ -76,13 +103,22 @@ export function LegalLayout({
   heading,
   intro,
   sections,
+  updated,
+  draft = true,
+  companyContact = true,
   extraToc = [],
   children,
 }: {
   seo: SeoEntry;
   heading: string;
-  intro: string;
+  intro: string | string[];
   sections: LegalSection[];
+  /** Fixed "Last updated" date (ISO); the build date is shown when omitted. */
+  updated?: string;
+  /** Show the "draft text" banner. */
+  draft?: boolean;
+  /** Append the company contact card (pages whose text has its own Contact Us section turn it off). */
+  companyContact?: boolean;
   /** Table of contents entries for sections passed as children. */
   extraToc?: { id: string; heading: string }[];
   children?: ReactNode;
@@ -92,15 +128,17 @@ export function LegalLayout({
       <Seo entry={seo} />
       <PageHeader title={heading}>
         <p className="text-muted">
-          {legalCommon.lastUpdated}: <time dateTime={buildDate}>{formatDate(buildDate)}</time>
+          {legalCommon.lastUpdated}: <time dateTime={updated ?? buildDate}>{formatDate(updated ?? buildDate)}</time>
         </p>
       </PageHeader>
       <div className="container-site pt-10 pb-20">
-        <p role="note" className="glass !rounded-lg2 flex items-start gap-3 p-4 text-blush max-w-prose">
-          <Icon name="info" size={22} className="shrink-0 mt-0.5" />
-          {legalCommon.draftBanner}
-        </p>
-        <div className="mt-10 grid gap-12 lg:grid-cols-[16rem_1fr]">
+        {draft ? (
+          <p role="note" className="glass !rounded-lg2 flex items-start gap-3 p-4 text-blush max-w-prose mb-10">
+            <Icon name="info" size={22} className="shrink-0 mt-0.5" />
+            {legalCommon.draftBanner}
+          </p>
+        ) : null}
+        <div className="grid gap-12 lg:grid-cols-[16rem_1fr]">
           <nav aria-label={legalCommon.contents} className="lg:sticky lg:top-[calc(var(--nav-h)+2rem)] self-start">
             <p className="eyebrow mb-3">{legalCommon.contents}</p>
             <ul className="grid gap-1 border-l hairline" role="list">
@@ -111,38 +149,34 @@ export function LegalLayout({
                   </a>
                 </li>
               ))}
-              <li>
-                <a href="#contact-us" className="block pl-4 py-1.5 text-small text-light/85 hover:text-light">
-                  {legalCommon.contactHeading}
-                </a>
-              </li>
+              {companyContact ? (
+                <li>
+                  <a href="#contact-us" className="block pl-4 py-1.5 text-small text-light/85 hover:text-light">
+                    {legalCommon.contactHeading}
+                  </a>
+                </li>
+              ) : null}
             </ul>
           </nav>
           <article className="prose-legal max-w-prose">
             <div className="flex items-center gap-3 mb-6">
               <Logo variant="light" height={26} />
             </div>
-            <p className="lead text-muted">{intro}</p>
+            {(Array.isArray(intro) ? intro : [intro]).map((p) => (
+              <p key={p} className="lead text-muted">
+                <RichText text={p} />
+              </p>
+            ))}
             {sections.map((s) => (
               <section key={s.id} id={s.id} aria-labelledby={`${s.id}-h`}>
                 <h2 id={`${s.id}-h`}>{s.heading}</h2>
-                {s.paragraphs?.map((p) => (
-                  <p key={p} className="text-light/90">
-                    {fill(p, tokens)}
-                  </p>
+                {s.blocks.map((b, i) => (
+                  <Block key={i} block={b} />
                 ))}
-                {s.list ? (
-                  <ul>
-                    {s.list.map((item) => (
-                      <li key={item} className="text-light/90">
-                        {fill(item, tokens)}
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
               </section>
             ))}
             {children}
+            {companyContact ? (
             <section id="contact-us" aria-labelledby="contact-us-h">
               <h2 id="contact-us-h">{legalCommon.contactHeading}</h2>
               <p className="text-light/90 mb-5">{legalCommon.contactIntro}</p>
@@ -151,6 +185,7 @@ export function LegalLayout({
                 <CompanyContact />
               </div>
             </section>
+            ) : null}
           </article>
         </div>
       </div>

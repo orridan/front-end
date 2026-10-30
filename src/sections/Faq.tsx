@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { faq, sectionIds } from '../content';
-import { openChat } from '../lib/events';
+import { openLiveChat } from '../lib/optionalScripts';
+import { requestContact } from '../lib/contactBridge';
 import { faqAnswer } from '../lib/faqText';
 import { Icon } from '../components/Icon';
 import { SectionTag } from '../components/Drawing';
@@ -14,6 +16,11 @@ export function Faq() {
   const [active, setActive] = useState<string | null>(faq.items[0].id);
   const shown = faq.items.find((i) => i.id === active) ?? faq.items[0];
   const shownIndex = faq.items.indexOf(shown);
+  const navigate = useNavigate();
+  // Live chat when Preferences consent loaded it; otherwise the contact form.
+  const ask = () => {
+    if (!openLiveChat()) requestContact(faq.askSubject, navigate);
+  };
 
   return (
     <section id={sectionIds.faq} aria-labelledby="faq-title" className="section paper">
@@ -27,7 +34,7 @@ export function Faq() {
           </div>
           <div className="lg:col-span-4 lg:col-start-9 flex items-center gap-4" data-reveal>
             <p className="text-small text-muted">{faq.askText}</p>
-            <button type="button" className="btn btn-ghost btn-sm shrink-0" onClick={openChat}>
+            <button type="button" className="btn btn-ghost btn-sm shrink-0" onClick={ask}>
               <Icon name="chat" size={16} />
               {faq.askCta}
             </button>

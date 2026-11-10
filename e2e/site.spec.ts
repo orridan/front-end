@@ -447,7 +447,10 @@ test.describe('social links', () => {
         await expect(link).toHaveAttribute('target', '_blank');
         await expect(link.locator('svg')).toHaveCount(1);
       }
-      for (const l of empty) await expect(area.getByRole('link', { name: new RegExp(`^${l.label}\\s*\\(`) })).toHaveCount(0);
+      for (const l of empty) {
+        await expect(area.getByRole('link', { name: new RegExp(`^${l.label}\\s*\\(`) })).toHaveCount(0);
+        await expect(area.getByTestId('social-pending').filter({ hasText: new RegExp(`^${l.label}\\(`) })).toBeVisible();
+      }
     }
   });
 });

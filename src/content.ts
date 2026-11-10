@@ -110,13 +110,13 @@ export type ExternalLink = {
   icon?: 'linkedin' | 'facebook' | 'youtube' | 'x' | 'pinterest' | 'crunchbase' | 'f6s' | 'link';
 };
 
-/** Social profiles, shown in the footer and the contact section. An empty href stays hidden until filled. */
+/** Social profiles, shown in the footer and the contact section. An empty href shows a dimmed, non-clickable icon until filled. */
 export const socialLinks: ExternalLink[] = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/company/orridan/', icon: 'linkedin' },
-  { label: 'Facebook', href: '', icon: 'facebook' },
-  { label: 'YouTube', href: '', icon: 'youtube' },
-  { label: 'X', href: '', icon: 'x' },
-  { label: 'Pinterest', href: '', icon: 'pinterest' },
+  { label: 'Facebook', href: 'https://www.facebook.com/Orridan/', icon: 'facebook' },
+  { label: 'YouTube', href: 'https://www.youtube.com/@Orridan-AI', icon: 'youtube' },
+  { label: 'X', href: 'https://x.com/OrridanAI', icon: 'x' },
+  { label: 'Pinterest', href: 'https://www.pinterest.com/OrridanAI/', icon: 'pinterest' },
 ];
 
 /** Company listings. */
@@ -685,6 +685,7 @@ export const footer = {
   },
   socialHeading: 'Follow',
   citationHeading: 'Listed on',
+  socialSoon: 'Coming soon',
   backToTop: 'Back to top',
   newTab: '(opens in a new tab)',
   copyright: '© {year} Orridan. All rights reserved.',

@@ -1,12 +1,17 @@
 /**
  * Optional, consent-gated loaders. Nothing in here may run before the visitor allows the
- * matching category. Both are stubs today: wire a real provider in when one is chosen.
+ * matching category. Live chat is the exception: it loads for everyone.
  */
-import { readEnv } from '../env';
+import { site } from '../content';
+
+type ChatwootApi = { toggle: (state?: 'open' | 'close') => void };
 
 declare global {
   interface Window {
     __orridanOptional?: { analytics?: boolean; chat?: string };
+    chatwootSettings?: Record<string, unknown>;
+    chatwootSDK?: { run: (config: { websiteToken: string; baseUrl: string }) => void };
+    $chatwoot?: ChatwootApi;
   }
 }
 
@@ -23,16 +28,22 @@ export function loadAnalytics(): void {
   // document.head.appendChild(s);
 }
 
-/** Runs only when a provider is configured AND the Preferences category is on. */
-export function loadChatProvider(): void {
-  const provider = readEnv('VITE_CHAT_PROVIDER', 'none').toLowerCase();
-  if (chatLoaded || !provider || provider === 'none') return;
+/** Chatwoot live chat. Loads for every visitor once the app has started (not consent-gated, at the client's request). */
+export function loadLiveChat(): void {
+  const { baseUrl, websiteToken } = site.chatwoot;
+  if (chatLoaded || !websiteToken) return;
   chatLoaded = true;
-  window.__orridanOptional = { ...window.__orridanOptional, chat: provider };
-  // Add the third-party widget loader for the chosen provider here.
+  window.chatwootSettings = { position: 'right', type: 'standard', launcherTitle: '' };
+  const script = document.createElement('script');
+  script.src = `${baseUrl}/packs/js/sdk.js`;
+  script.async = true;
+  script.onload = () => window.chatwootSDK?.run({ websiteToken, baseUrl });
+  document.head.appendChild(script);
 }
 
-export function chatProviderConfigured(): boolean {
-  const provider = readEnv('VITE_CHAT_PROVIDER', 'none').toLowerCase();
-  return Boolean(provider) && provider !== 'none';
+/** Opens the chat window. Returns false while the widget has not loaded yet. */
+export function openLiveChat(): boolean {
+  if (!window.$chatwoot) return false;
+  window.$chatwoot.toggle('open');
+  return true;
 }

@@ -21,7 +21,20 @@ const RECAPTCHA_STUB = `
   if (window.orridanRecaptchaLoaded) window.orridanRecaptchaLoaded();
 `;
 
+/** Minimal stand-in for the Chatwoot SDK: records widget calls on window.__chatwoot. */
+const CHATWOOT_STUB = `window.chatwootSDK = { run: function (config) {
+  var log = (window.__chatwoot = { config: config, calls: [] });
+  window.$chatwoot = {
+    toggle: function (s) { log.calls.push("toggle:" + s); },
+    toggleBubbleVisibility: function (s) { log.calls.push("bubble:" + s); },
+    reset: function () { log.calls.push("reset"); },
+  };
+} };`;
+
 export async function stubThirdParties(page: Page) {
+  await page.route('https://app.chatwoot.com/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/javascript', body: CHATWOOT_STUB }),
+  );
   await page.route('https://www.google.com/recaptcha/**', (route) =>
     route.fulfill({ status: 200, contentType: 'application/javascript', body: RECAPTCHA_STUB }),
   );
@@ -75,7 +88,7 @@ export const test = base.extend<{ problems: string[] }>({
       problems.push(`requestfailed: ${r.url()} ${reason}`);
     });
     page.on('response', (r) => {
-      if (r.status() >= 400 && !r.url().includes('/api/contact.php')) problems.push(`http ${r.status()}: ${r.url()}`);
+      if (r.status() >= 400 && !r.url().startsWith('https://formspree.io/')) problems.push(`http ${r.status()}: ${r.url()}`);
     });
     await use(problems);
   },

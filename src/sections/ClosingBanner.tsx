@@ -9,7 +9,7 @@ export function ClosingBanner() {
   const navigate = useNavigate();
   return (
     <section aria-labelledby="closing-title" className="relative overflow-hidden border-t hairline drawing">
-      <div className="container-site py-20 sm:py-28 grid gap-10 lg:grid-cols-12 lg:items-center">
+      <div className="container-site py-14 sm:py-20 grid gap-10 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-8 relative z-10" data-reveal>
           <h2 id="closing-title" className="outline-text !text-[clamp(2.75rem,1.4rem+5vw,6.5rem)]">
             {closingBanner.heading}

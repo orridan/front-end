@@ -214,7 +214,7 @@
 
   .section {
     position: relative;
-    padding-block: clamp(4.5rem, 3rem + 6vw, 9rem);
+    padding-block: clamp(3rem, 2rem + 3.5vw, 5.5rem);
   }
   /* Offscreen sections skip style, layout and paint until they approach the viewport.
      auto remembers the real size once rendered, so anchors and scroll-spy stay accurate. */
@@ -379,7 +379,7 @@
     font-family: var(--font-mono);
     letter-spacing: 0.04em;
   }
-  /* Small UI headings (dialogs, consent card, chatbot) keep the reading face. */
+  /* Small UI headings (dialogs, consent card) keep the reading face. */
   .h-plain {
     font-family: var(--font-body) !important;
     text-transform: none !important;
@@ -861,6 +861,34 @@
   }
   .prose-legal p + p {
     margin-top: 0.9rem;
+  }
+  .prose-legal h3 {
+    font-size: 1.3rem;
+    margin-top: 2rem;
+    margin-bottom: 0.6rem;
+  }
+  .prose-legal h4 {
+    font-size: 1.05rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .prose-legal ul + p,
+  .prose-legal p + ul,
+  .prose-legal h4 + ul {
+    margin-top: 0.9rem;
+  }
+  .prose-legal ul + p {
+    margin-top: 1.1rem;
+  }
+  .prose-legal li p + p {
+    margin-top: 0.35rem;
+  }
+  .prose-legal li ul {
+    margin-top: 0.5rem;
+  }
+  .prose-legal strong {
+    font-weight: 600;
+    color: var(--c4, inherit);
   }
   .prose-legal ul {
     list-style: none;

@@ -8,6 +8,7 @@ import { isRealEmail } from '../lib/placeholder';
 import { validateContact, validateField, type ContactErrors, type ContactValues } from '../lib/validation';
 import { Icon } from '../components/Icon';
 import { CompanyContact } from '../components/LegalLayout';
+import { SocialLinks } from '../components/SocialLinks';
 import { Recaptcha } from '../components/Recaptcha';
 import { SectionTag } from '../components/Drawing';
 
@@ -64,7 +65,7 @@ function ContactForm() {
   const controller = useRef<AbortController | null>(null);
   const captchaRequired = Boolean(recaptchaSiteKey);
 
-  // Subject prefill from pricing, chatbot and banners.
+  // Subject prefill from pricing, FAQ and banners.
   useEffect(() => {
     consumePendingSubject();
     return onContactPrefill((subject) => {
@@ -77,6 +78,13 @@ function ContactForm() {
   }, []);
 
   useEffect(() => () => controller.current?.abort(), []);
+
+  // Show the thank-you panel briefly, then return to the empty form for the next message.
+  useEffect(() => {
+    if (status !== 'success') return;
+    const timer = window.setTimeout(() => setStatus('idle'), contact.successResetMs);
+    return () => window.clearTimeout(timer);
+  }, [status]);
 
   const onToken = useCallback((t: string | null) => {
     setToken(t);
@@ -112,15 +120,17 @@ function ContactForm() {
     controller.current?.abort();
     controller.current = new AbortController();
     const result = await postForm(
+      contact.endpoint,
       {
-        type: 'contact',
         name: values.name.trim(),
         email: values.email.trim(),
         company: values.company.trim(),
         subject: values.subject,
         message: values.message.trim(),
-        hp_field: hp,
-        recaptchaToken: token ?? '',
+        // Formspree fields: email subject line, honeypot and the reCAPTCHA token.
+        _subject: contact.emailSubject.replace('{subject}', values.subject),
+        _gotcha: hp,
+        'g-recaptcha-response': token ?? '',
       },
       controller.current.signal,
     );
@@ -374,6 +384,7 @@ export function Contact() {
             <div className="p-5">
               <CompanyContact />
             </div>
+            <SocialLinks className="px-5 py-4 border-t border-blush/40" />
             <div className="border-t border-blush/40">
               <MapIllustration />
             </div>

@@ -48,10 +48,18 @@ function PlanAction({ plan }: { plan: Plan }) {
   const tone = plan.highlighted ? 'btn-navy' : 'btn-primary shimmer';
   if (price.kind === 'custom') {
     return (
-      <button type="button" className={`btn ${tone} w-full`} onClick={() => requestContact(pricing.enterpriseSubject, navigate)} data-testid={`plan-cta-${plan.id}`}>
+      <a
+        href={`/#${sectionIds.contact}`}
+        className={`btn ${tone} w-full`}
+        onClick={(e) => {
+          e.preventDefault();
+          requestContact(pricing.enterpriseSubject, navigate);
+        }}
+        data-testid={`plan-cta-${plan.id}`}
+      >
         {plan.ctaLabel}
         <Icon name="arrowRight" size={18} />
-      </button>
+      </a>
     );
   }
   const href = getStripeLink(plan.id, interval);

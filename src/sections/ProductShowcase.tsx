@@ -135,7 +135,7 @@ export function ProductShowcase() {
           <div className="product-future-boundary">
             <div className="product-future-heading">
               <div>
-                <p className="section-tag">{productPage.architecture.boundaryLabel}</p>
+                <p className="section-tag">{productPage.technology.boundaryLabel}</p>
                 <h3>{productPage.architecture.futureHeading}</h3>
                 <p>{productPage.architecture.futureIntro}</p>
               </div>

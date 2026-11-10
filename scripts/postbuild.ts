@@ -175,7 +175,8 @@ for (const file of allHtml) {
   const head = html.slice(0, html.indexOf('</head>'));
   if ((head.match(/<title>/g)?.length ?? 0) !== 1) errors.push(`${file}: expected exactly one <title> in <head>.`);
   if (!html.includes(`content="${entry.noindex ? 'noindex,follow' : 'index,follow'}"`)) errors.push(`${file}: robots meta mismatch.`);
-  if (/\b(NVIDIA)\b/i.test(html)) errors.push(`${file}: forbidden brand name found.`);
+  // The product page copy (supplied by the tech solution team) names NVIDIA technologies as proposed integrations.
+  if (entry.path !== seo.product.path && /\b(NVIDIA)\b/i.test(html)) errors.push(`${file}: forbidden brand name found.`);
   for (const m of html.matchAll(/(?:href|src)="(\/[^"#?]*)"/g)) {
     const ref = m[1];
     if (ref === '/') continue;

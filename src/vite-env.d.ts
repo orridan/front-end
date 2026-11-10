@@ -6,7 +6,6 @@ interface ImportMetaEnv {
   readonly VITE_SITE_URL?: string;
   readonly VITE_DASHBOARD_URL?: string;
   readonly VITE_RECAPTCHA_SITE_KEY?: string;
-  readonly VITE_CHAT_PROVIDER?: string;
   readonly VITE_STRIPE_LINK_ORGANISATION_MONTHLY?: string;
   readonly VITE_STRIPE_LINK_ORGANISATION_ANNUAL?: string;
   readonly VITE_STRIPE_LINK_TWIN_MONTHLY?: string;

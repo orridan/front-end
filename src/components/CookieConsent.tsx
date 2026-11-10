@@ -5,7 +5,7 @@ import { AnimatePresence, m } from 'framer-motion';
 import { cookieConsent, routes } from '../content';
 import { consentStore, makeConsent, type ConsentRecord } from '../lib/consent';
 import { useFocusTrap, useScrollLock } from '../lib/hooks';
-import { chatProviderConfigured, loadAnalytics, loadChatProvider } from '../lib/optionalScripts';
+import { loadAnalytics } from '../lib/optionalScripts';
 import { Icon } from './Icon';
 
 function useConsent(): ConsentRecord | null {
@@ -21,7 +21,6 @@ export function ConsentEffects() {
   useEffect(() => {
     if (!consent) return;
     if (consent.categories.analytics) loadAnalytics();
-    if (consent.categories.preferences && chatProviderConfigured()) loadChatProvider();
   }, [consent]);
   return null;
 }
